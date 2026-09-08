@@ -50,7 +50,7 @@ fi
 
 ### Method 1: Global install (recommended)
 
-This install applies to all Maven builds on the machine.
+This install applies to all Maven builds on the machine. It's only loaded if it's actually used.
 
 ```bash
 set -e
