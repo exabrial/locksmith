@@ -5,6 +5,8 @@ import java.util.Map;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.sonatype.plexus.components.sec.dispatcher.PasswordDecryptor;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcherException;
 
@@ -13,6 +15,11 @@ import com.github.exabrial.locksmith.CredentialReader;
 @Singleton
 @Named("locksmith")
 public class LocksmithPasswordDecryptor implements PasswordDecryptor {
+	private static final Logger log = LoggerFactory.getLogger(LocksmithPasswordDecryptor.class);
+
+	public LocksmithPasswordDecryptor() {
+		log.info("LocksmithPasswordDecryptor() Locksmith password decryptor loaded");
+	}
 
 	@Override
 	@SuppressWarnings("rawtypes")

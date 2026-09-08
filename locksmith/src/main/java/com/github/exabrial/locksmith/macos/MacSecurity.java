@@ -59,9 +59,10 @@ public class MacSecurity {
 		};
 	}
 
-	static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup.libraryLookup(System.mapLibraryName("Security"), LIBRARY_ARENA)
-			.or(SymbolLookup.libraryLookup(System.mapLibraryName("CoreFoundation"), LIBRARY_ARENA)).or(SymbolLookup.loaderLookup())
-			.or(Linker.nativeLinker().defaultLookup());
+	static final SymbolLookup SYMBOL_LOOKUP = SymbolLookup
+			.libraryLookup("/System/Library/Frameworks/Security.framework/Security", LIBRARY_ARENA)
+			.or(SymbolLookup.libraryLookup("/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation", LIBRARY_ARENA))
+			.or(SymbolLookup.loaderLookup()).or(Linker.nativeLinker().defaultLookup());
 
 	public static final ValueLayout.OfBoolean C_BOOL = ValueLayout.JAVA_BOOLEAN;
 	public static final ValueLayout.OfByte C_CHAR = ValueLayout.JAVA_BYTE;

@@ -34,6 +34,20 @@ security find-generic-password -s "nexus.superbiz.example.com" -a "your-nexus-us
 
 Maven core extensions load at startup, before `settings.xml` server passwords are resolved. You cannot add a core extension to a POM. Use one of the two methods below.
 
+### Create `settings-security.xml`
+
+Maven's `DefaultSecDispatcher` reads `settings-security.xml` before it dispatches to locksmith. The file must exist or the decryptor never runs. Create it if it does not exist:
+
+```bash
+if [ ! -f "$HOME/.m2/settings-security.xml" ]; then
+  tee ~/.m2/settings-security.xml << 'EOF'
+<settingsSecurity>
+  <master>{locksmith-managed}</master>
+</settingsSecurity>
+EOF
+fi
+```
+
 ### Method 1: Global install (recommended)
 
 This install applies to all Maven builds on the machine.
@@ -55,7 +69,12 @@ gpg --verify "locksmith-maven-extension-${LOCKSMITH_VERSION}.jar.asc"
 
 EXT_DIR=$(dirname "$(which mvn)")/../lib/ext
 mv -v "locksmith-maven-extension-${LOCKSMITH_VERSION}.jar" "${EXT_DIR}/"
+```
 
+#### Method 1: uninstallation
+
+```
+rm -rfv "$(dirname "$(which mvn)")/../lib/ext/"/locksmith*
 ```
 
 ### Method 2: Per-project `.mvn/extensions.xml`
@@ -74,7 +93,7 @@ Create `.mvn/extensions.xml` in the project root:
 </extensions>
 ```
 
-## Usage: Maven Extension (recommended)
+## Usage: Maven Extension
 
 Use the extension when Maven must authenticate to a repository or server.
 
@@ -94,7 +113,7 @@ The format is `{[type=locksmith]serviceName/accountName}`. Maven's `DefaultSecDi
 
 ## Usage: Maven Plugin
 
-Use the plugin when you need a password as a Maven project property for another plugin's configuration (like wagon).
+Use the plugin when you need a password as a Maven project property for another plugin's configuration exported as a maven property.
 
 ```xml
 <plugin>
@@ -126,16 +145,23 @@ After the `validate` phase, `${nexus.password}` is available to all subsequent p
 | `accountName` | yes | | Keychain account name |
 | `passwordProperty` | yes | `password` | Maven project property to set |
 
-## Development notes
+## Development
 
-### Regenerate FFM bindings
+### Notes to future self
+
+...so I don't forget how to do this when Apple breaks backwards compatibility next year.
+
+#### Installing jextract
 
 ```bash
 sdk install jextract
-cd ~/opensource/locksmith
 ```
 
+#### Regenerate FFM bindings
+
 ```bash
+cd ~/opensource/locksmith
+
 SDK=$(xcrun --show-sdk-path)
 
 mkdir -p /tmp/locksmith-headers
@@ -176,4 +202,11 @@ jextract --target-package com.github.exabrial.locksmith.macos \
     /tmp/locksmith-headers/locksmith.h
 ```
 
-The `_malloc_type.h` and `CFBase.h` visionOS warnings are harmless. Ignore them.
+#### Install during development:
+
+```
+cd ~/opensource/locksmith
+rm -rfv "$(dirname "$(which mvn)")/../lib/ext/"/locksmith*
+mvn clean install
+cp -v locksmith-maven-extension/target/locksmith-maven-extension-*.jar "$(dirname "$(which mvn)")/../lib/ext/"
+```
