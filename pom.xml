@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -11,7 +10,7 @@
 
 	<groupId>com.github.exabrial.locksmith</groupId>
 	<artifactId>locksmith-parent</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 	<description>Locksmith: Retrieve secrets from OS credential stores and set them as Maven project properties</description>
@@ -34,7 +33,7 @@
 			<dependency>
 				<groupId>com.github.exabrial.locksmith</groupId>
 				<artifactId>locksmith</artifactId>
-				<version>1.0.0-SNAPSHOT</version>
+				<version>1.0.2-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -45,7 +44,14 @@
 				<plugin>
 					<groupId>com.github.exabrial.locksmith</groupId>
 					<artifactId>locksmith-maven-plugin</artifactId>
-					<version>1.0.0-SNAPSHOT</version>
+					<version>1.0.2-SNAPSHOT</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<configuration>
+						<keyname>871638A21A7F2C38066471420306A354336B4F0D</keyname>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
