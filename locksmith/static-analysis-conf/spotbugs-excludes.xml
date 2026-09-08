@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+	<Match>
+		<Source name="~.*MacSecurity\.java" />
+	</Match>
+	<Match>
+		<Source name="~.*CFDictionaryKeyCallBacks\.java" />
+	</Match>
+	<Match>
+		<Source name="~.*CFDictionaryValueCallBacks\.java" />
+	</Match>
+</FindBugsFilter>
