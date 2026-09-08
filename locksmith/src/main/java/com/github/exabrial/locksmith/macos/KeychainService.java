@@ -33,7 +33,7 @@ public final class KeychainService {
 	}
 
 	public static String readPassword(final String serviceName, final String accountName) {
-		try (final Arena arena = Arena.ofConfined()) {
+		try (Arena arena = Arena.ofConfined()) {
 			final MemorySegment cfServiceName = createCFString(arena, serviceName);
 			final MemorySegment cfAccountName = createCFString(arena, accountName);
 			try {

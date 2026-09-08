@@ -19,9 +19,13 @@ import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 
+import javax.annotation.processing.Generated;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("all")
+@Generated("jextract")
 public class MacSecurity {
 	private static final Logger log = LoggerFactory.getLogger(MacSecurity.class);
 

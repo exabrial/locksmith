@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<FindBugsFilter
-	xmlns="https://github.com/spotbugs/filter/3.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="https://github.com/spotbugs/filter/3.0.0 https://raw.githubusercontent.com/spotbugs/spotbugs/3.1.0/spotbugs/etc/findbugsfilter.xsd">
+<FindBugsFilter>
 	<Match>
-		<Class name="com.github.exabrial.cdi.common.config.producer.PropertyProducer" />
-		<BugPattern name="PATH_TRAVERSAL_IN" />
+		<Source name="~.*MacSecurity\.java" />
 	</Match>
 	<Match>
-		<Class name="com.github.exabrial.cdi.common.jsonb.producer.InheritedPropertyVisibilityStrategy" />
-		<BugPattern name="SE_BAD_FIELD" />
+		<Source name="~.*CFDictionaryKeyCallBacks\.java" />
+	</Match>
+	<Match>
+		<Source name="~.*CFDictionaryValueCallBacks\.java" />
 	</Match>
 </FindBugsFilter>

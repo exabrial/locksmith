@@ -13,6 +13,8 @@ import java.lang.foreign.SegmentAllocator;
 import java.lang.foreign.ValueLayout.OfLong;
 import java.util.function.Consumer;
 
+import javax.annotation.processing.Generated;
+
 /**
  * {@snippet lang = c :
  * struct {
@@ -25,6 +27,8 @@ import java.util.function.Consumer;
  * }
  * }
  */
+@SuppressWarnings("all")
+@Generated("jextract")
 public class CFDictionaryKeyCallBacks {
 
 	CFDictionaryKeyCallBacks() {
