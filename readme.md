@@ -53,7 +53,9 @@ fi
 
 ### Method 1: Global install (recommended)
 
-This install applies to all Maven builds on the machine. It's only loaded if it's actually used.
+A global installation puts the locksmith extension jar in Maven's `lib/ext` folder. This install applies to all Maven builds on the machine. The extension is only loaded if it's actually used.
+
+You can copy the jar by hand, or use this script below to download and verify the PGP signature of the extension jar:
 
 ```bash
 LOCKSMITH_VERSION=1.1.0
