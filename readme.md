@@ -19,7 +19,7 @@ Read passwords from the macOS Keychain during a Maven build.... because storing 
 ## Store a password in the Keychain
 
 ```bash
-security add-generic-password -s "nexus.superbiz.example.com" -a "deployer" -w -U
+security add-generic-password -U -s "nexus.superbiz.example.com" -a "your-nexus-username" -w
 ```
 
 The `-w` flag with no value prompts for the password. The `-U` flag updates the item if it already exists.
@@ -27,7 +27,7 @@ The `-w` flag with no value prompts for the password. The `-U` flag updates the 
 To verify:
 
 ```bash
-security find-generic-password -s "nexus.superbiz.example.com" -a "deployer" -w
+security find-generic-password -s "nexus.superbiz.example.com" -a "your-nexus-username" -w
 ```
 
 ## Install the Maven Extension
@@ -84,8 +84,8 @@ Reference the Keychain item in `settings.xml`:
 <servers>
     <server>
         <id>my-nexus</id>
-        <username>deployer</username>
-        <password>{[type=locksmith]nexus.superbiz.example.com/deployer}</password>
+        <username>your-nexus-username</username>
+        <password>{[type=locksmith]nexus.superbiz.example.com/your-nexus-username}</password>
     </server>
 </servers>
 ```
@@ -108,7 +108,7 @@ Use the plugin when you need a password as a Maven project property for another 
             </goals>
             <configuration>
                 <serviceName>nexus.superbiz.example.com</serviceName>
-                <accountName>deployer</accountName>
+                <accountName>your-nexus-username</accountName>
                 <passwordProperty>nexus.password</passwordProperty>
             </configuration>
         </execution>
