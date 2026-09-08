@@ -46,6 +46,13 @@
 					<artifactId>locksmith-maven-plugin</artifactId>
 					<version>1.0.1-SNAPSHOT</version>
 				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<configuration>
+						<keyname>871638A21A7F2C38066471420306A354336B4F0D</keyname>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

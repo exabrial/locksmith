@@ -54,7 +54,7 @@ This install applies to all Maven builds on the machine. It's only loaded if it'
 
 ```bash
 set -e
-LOCKSMITH_VERSION=1.0.0
+LOCKSMITH_VERSION=1.0.1
 
 gpg --keyserver hkps://keys.openpgp.org --recv-keys 871638A21A7F2C38066471420306A354336B4F0D
 
@@ -88,7 +88,7 @@ Create `.mvn/extensions.xml` in the project root:
     <extension>
         <groupId>com.github.exabrial.locksmith</groupId>
         <artifactId>locksmith-maven-extension</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1</version>
     </extension>
 </extensions>
 ```
@@ -123,7 +123,7 @@ Use the plugin when you need a password as a Maven project property for another 
 <plugin>
     <groupId>com.github.exabrial.locksmith</groupId>
     <artifactId>locksmith-maven-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <executions>
         <execution>
             <goals>
