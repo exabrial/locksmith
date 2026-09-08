@@ -71,7 +71,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFIndex version
 	 * }
 	 */
-	public static long version(MemorySegment struct) {
+	public static long version(final MemorySegment struct) {
 		return struct.get(version$LAYOUT, version$OFFSET);
 	}
 
@@ -80,7 +80,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFIndex version
 	 * }
 	 */
-	public static void version(MemorySegment struct, long fieldValue) {
+	public static void version(final MemorySegment struct, final long fieldValue) {
 		struct.set(version$LAYOUT, version$OFFSET, fieldValue);
 	}
 
@@ -111,7 +111,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryRetainCallBack retain
 	 * }
 	 */
-	public static MemorySegment retain(MemorySegment struct) {
+	public static MemorySegment retain(final MemorySegment struct) {
 		return struct.get(retain$LAYOUT, retain$OFFSET);
 	}
 
@@ -120,7 +120,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryRetainCallBack retain
 	 * }
 	 */
-	public static void retain(MemorySegment struct, MemorySegment fieldValue) {
+	public static void retain(final MemorySegment struct, final MemorySegment fieldValue) {
 		struct.set(retain$LAYOUT, retain$OFFSET, fieldValue);
 	}
 
@@ -151,7 +151,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryReleaseCallBack release
 	 * }
 	 */
-	public static MemorySegment release(MemorySegment struct) {
+	public static MemorySegment release(final MemorySegment struct) {
 		return struct.get(release$LAYOUT, release$OFFSET);
 	}
 
@@ -160,7 +160,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryReleaseCallBack release
 	 * }
 	 */
-	public static void release(MemorySegment struct, MemorySegment fieldValue) {
+	public static void release(final MemorySegment struct, final MemorySegment fieldValue) {
 		struct.set(release$LAYOUT, release$OFFSET, fieldValue);
 	}
 
@@ -191,7 +191,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryCopyDescriptionCallBack copyDescription
 	 * }
 	 */
-	public static MemorySegment copyDescription(MemorySegment struct) {
+	public static MemorySegment copyDescription(final MemorySegment struct) {
 		return struct.get(copyDescription$LAYOUT, copyDescription$OFFSET);
 	}
 
@@ -200,7 +200,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryCopyDescriptionCallBack copyDescription
 	 * }
 	 */
-	public static void copyDescription(MemorySegment struct, MemorySegment fieldValue) {
+	public static void copyDescription(final MemorySegment struct, final MemorySegment fieldValue) {
 		struct.set(copyDescription$LAYOUT, copyDescription$OFFSET, fieldValue);
 	}
 
@@ -231,7 +231,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryEqualCallBack equal
 	 * }
 	 */
-	public static MemorySegment equal(MemorySegment struct) {
+	public static MemorySegment equal(final MemorySegment struct) {
 		return struct.get(equal$LAYOUT, equal$OFFSET);
 	}
 
@@ -240,7 +240,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryEqualCallBack equal
 	 * }
 	 */
-	public static void equal(MemorySegment struct, MemorySegment fieldValue) {
+	public static void equal(final MemorySegment struct, final MemorySegment fieldValue) {
 		struct.set(equal$LAYOUT, equal$OFFSET, fieldValue);
 	}
 
@@ -271,7 +271,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryHashCallBack hash
 	 * }
 	 */
-	public static MemorySegment hash(MemorySegment struct) {
+	public static MemorySegment hash(final MemorySegment struct) {
 		return struct.get(hash$LAYOUT, hash$OFFSET);
 	}
 
@@ -280,7 +280,7 @@ public class CFDictionaryKeyCallBacks {
 	 * {@snippet lang = c : * CFDictionaryHashCallBack hash
 	 * }
 	 */
-	public static void hash(MemorySegment struct, MemorySegment fieldValue) {
+	public static void hash(final MemorySegment struct, final MemorySegment fieldValue) {
 		struct.set(hash$LAYOUT, hash$OFFSET, fieldValue);
 	}
 
@@ -288,7 +288,7 @@ public class CFDictionaryKeyCallBacks {
 	 * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}. The returned segment has address
 	 * {@code arrayParam.address() + index * layout().byteSize()}
 	 */
-	public static MemorySegment asSlice(MemorySegment array, long index) {
+	public static MemorySegment asSlice(final MemorySegment array, final long index) {
 		return array.asSlice(layout().byteSize() * index);
 	}
 
@@ -302,7 +302,7 @@ public class CFDictionaryKeyCallBacks {
 	/**
 	 * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
 	 */
-	public static MemorySegment allocate(SegmentAllocator allocator) {
+	public static MemorySegment allocate(final SegmentAllocator allocator) {
 		return allocator.allocate(layout());
 	}
 
@@ -310,7 +310,7 @@ public class CFDictionaryKeyCallBacks {
 	 * Allocate an array of size {@code elementCount} using {@code allocator}. The returned segment has size
 	 * {@code elementCount * layout().byteSize()}.
 	 */
-	public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+	public static MemorySegment allocateArray(final long elementCount, final SegmentAllocator allocator) {
 		return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
 	}
 
@@ -318,7 +318,7 @@ public class CFDictionaryKeyCallBacks {
 	 * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any). The returned segment has size
 	 * {@code layout().byteSize()}
 	 */
-	public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+	public static MemorySegment reinterpret(final MemorySegment addr, final Arena arena, final Consumer<MemorySegment> cleanup) {
 		return reinterpret(addr, 1, arena, cleanup);
 	}
 
@@ -326,7 +326,8 @@ public class CFDictionaryKeyCallBacks {
 	 * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any). The returned segment has size
 	 * {@code elementCount * layout().byteSize()}
 	 */
-	public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+	public static MemorySegment reinterpret(final MemorySegment addr, final long elementCount, final Arena arena,
+			final Consumer<MemorySegment> cleanup) {
 		return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
 	}
 }

@@ -18,44 +18,40 @@ import java.lang.foreign.SymbolLookup;
 import java.lang.foreign.ValueLayout;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MacSecurity {
+	private static final Logger log = LoggerFactory.getLogger(MacSecurity.class);
 
 	MacSecurity() {
 		// Should not be called directly
 	}
 
 	static final Arena LIBRARY_ARENA = Arena.ofAuto();
-	static final boolean TRACE_DOWNCALLS = Boolean.getBoolean("jextract.trace.downcalls");
 
-	static void traceDowncall(String name, Object... args) {
-		String traceArgs = Arrays.stream(args).map(Object::toString).collect(Collectors.joining(", "));
-		System.out.printf("%s(%s)\n", name, traceArgs);
-	}
-
-	static MemorySegment findOrThrow(String symbol) {
+	static MemorySegment findOrThrow(final String symbol) {
 		return SYMBOL_LOOKUP.find(symbol).orElseThrow(() -> new UnsatisfiedLinkError("unresolved symbol: " + symbol));
 	}
 
-	static MethodHandle upcallHandle(Class<?> fi, String name, FunctionDescriptor fdesc) {
+	static MethodHandle upcallHandle(final Class<?> fi, final String name, final FunctionDescriptor fdesc) {
 		try {
 			return MethodHandles.lookup().findVirtual(fi, name, fdesc.toMethodType());
-		} catch (ReflectiveOperationException ex) {
+		} catch (final ReflectiveOperationException ex) {
 			throw new AssertionError(ex);
 		}
 	}
 
-	static MemoryLayout align(MemoryLayout layout, long align) {
+	static MemoryLayout align(final MemoryLayout layout, final long align) {
 		return switch (layout) {
-			case PaddingLayout p -> p;
-			case ValueLayout v -> v.withByteAlignment(align);
-			case GroupLayout g -> {
-				MemoryLayout[] alignedMembers = g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[]::new);
+			case final PaddingLayout p -> p;
+			case final ValueLayout v -> v.withByteAlignment(align);
+			case final GroupLayout g -> {
+				final MemoryLayout[] alignedMembers = g.memberLayouts().stream().map(m -> align(m, align)).toArray(MemoryLayout[]::new);
 				yield g instanceof StructLayout ? MemoryLayout.structLayout(alignedMembers) : MemoryLayout.unionLayout(alignedMembers);
 			}
-			case SequenceLayout s -> MemoryLayout.sequenceLayout(s.elementCount(), align(s.elementLayout(), align));
+			case final SequenceLayout s -> MemoryLayout.sequenceLayout(s.elementCount(), align(s.elementLayout(), align));
 		};
 	}
 
@@ -71,7 +67,7 @@ public class MacSecurity {
 	public static final ValueLayout.OfFloat C_FLOAT = ValueLayout.JAVA_FLOAT;
 	public static final ValueLayout.OfDouble C_DOUBLE = ValueLayout.JAVA_DOUBLE;
 	public static final AddressLayout C_POINTER = ValueLayout.ADDRESS
-			.withTargetLayout(MemoryLayout.sequenceLayout(java.lang.Long.MAX_VALUE, JAVA_BYTE));
+			.withTargetLayout(MemoryLayout.sequenceLayout(Long.MAX_VALUE, JAVA_BYTE));
 	public static final ValueLayout.OfLong C_LONG = ValueLayout.JAVA_LONG;
 
 	private static class kCFAllocatorDefault$constants {
@@ -111,7 +107,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFAllocatorRef kCFAllocatorDefault
 	 * }
 	 */
-	public static void kCFAllocatorDefault(MemorySegment varValue) {
+	public static void kCFAllocatorDefault(final MemorySegment varValue) {
 		kCFAllocatorDefault$constants.SEGMENT.set(kCFAllocatorDefault$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -154,14 +150,12 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern void CFRelease(CFTypeRef cf)
 	 * }
 	 */
-	public static void CFRelease(MemorySegment cf) {
-		var mh$ = CFRelease.HANDLE;
+	public static void CFRelease(final MemorySegment cf) {
+		final var mh$ = CFRelease.HANDLE;
 		try {
-			if (TRACE_DOWNCALLS) {
-				traceDowncall("CFRelease", cf);
-			}
+			log.trace("cfRelease() cf:{}", cf);
 			mh$.invokeExact(cf);
-		} catch (Throwable ex$) {
+		} catch (final Throwable ex$) {
 			throw new AssertionError("should not reach here", ex$);
 		}
 	}
@@ -195,7 +189,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFDictionaryKeyCallBacks kCFTypeDictionaryKeyCallBacks
 	 * }
 	 */
-	public static void kCFTypeDictionaryKeyCallBacks(MemorySegment varValue) {
+	public static void kCFTypeDictionaryKeyCallBacks(final MemorySegment varValue) {
 		MemorySegment.copy(varValue, 0L, kCFTypeDictionaryKeyCallBacks$constants.SEGMENT, 0L,
 				kCFTypeDictionaryKeyCallBacks$constants.LAYOUT.byteSize());
 	}
@@ -229,7 +223,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFDictionaryValueCallBacks kCFTypeDictionaryValueCallBacks
 	 * }
 	 */
-	public static void kCFTypeDictionaryValueCallBacks(MemorySegment varValue) {
+	public static void kCFTypeDictionaryValueCallBacks(final MemorySegment varValue) {
 		MemorySegment.copy(varValue, 0L, kCFTypeDictionaryValueCallBacks$constants.SEGMENT, 0L,
 				kCFTypeDictionaryValueCallBacks$constants.LAYOUT.byteSize());
 	}
@@ -278,15 +272,16 @@ public class MacSecurity {
 	 * : * extern CFDictionaryRef CFDictionaryCreate(CFAllocatorRef allocator, const void **keys, const void **values, CFIndex numValues, const CFDictionaryKeyCallBacks *keyCallBacks, const CFDictionaryValueCallBacks *valueCallBacks)
 	 * }
 	 */
-	public static MemorySegment CFDictionaryCreate(MemorySegment allocator, MemorySegment keys, MemorySegment values, long numValues,
-			MemorySegment keyCallBacks, MemorySegment valueCallBacks) {
-		var mh$ = CFDictionaryCreate.HANDLE;
+	public static MemorySegment CFDictionaryCreate(final MemorySegment allocator, final MemorySegment keys, final MemorySegment values,
+			final long numValues, final MemorySegment keyCallBacks, final MemorySegment valueCallBacks) {
+		final var mh$ = CFDictionaryCreate.HANDLE;
 		try {
-			if (TRACE_DOWNCALLS) {
-				traceDowncall("CFDictionaryCreate", allocator, keys, values, numValues, keyCallBacks, valueCallBacks);
-			}
-			return (MemorySegment) mh$.invokeExact(allocator, keys, values, numValues, keyCallBacks, valueCallBacks);
-		} catch (Throwable ex$) {
+			log.trace("cfDictionaryCreate() allocator:{} keys:{} values:{} numValues:{} keyCallBacks:{} valueCallBacks:{}", allocator, keys,
+					values, numValues, keyCallBacks, valueCallBacks);
+			final MemorySegment result = (MemorySegment) mh$.invokeExact(allocator, keys, values, numValues, keyCallBacks, valueCallBacks);
+			log.trace("cfDictionaryCreate() result:{}", result);
+			return result;
+		} catch (final Throwable ex$) {
 			throw new AssertionError("should not reach here", ex$);
 		}
 	}
@@ -330,14 +325,14 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern CFIndex CFDataGetLength(CFDataRef theData)
 	 * }
 	 */
-	public static long CFDataGetLength(MemorySegment theData) {
-		var mh$ = CFDataGetLength.HANDLE;
+	public static long CFDataGetLength(final MemorySegment theData) {
+		final var mh$ = CFDataGetLength.HANDLE;
 		try {
-			if (TRACE_DOWNCALLS) {
-				traceDowncall("CFDataGetLength", theData);
-			}
-			return (long) mh$.invokeExact(theData);
-		} catch (Throwable ex$) {
+			log.trace("cfDataGetLength() theData:{}", theData);
+			final long result = (long) mh$.invokeExact(theData);
+			log.trace("cfDataGetLength() result:{}", result);
+			return result;
+		} catch (final Throwable ex$) {
 			throw new AssertionError("should not reach here", ex$);
 		}
 	}
@@ -381,14 +376,14 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const UInt8 *CFDataGetBytePtr(CFDataRef theData)
 	 * }
 	 */
-	public static MemorySegment CFDataGetBytePtr(MemorySegment theData) {
-		var mh$ = CFDataGetBytePtr.HANDLE;
+	public static MemorySegment CFDataGetBytePtr(final MemorySegment theData) {
+		final var mh$ = CFDataGetBytePtr.HANDLE;
 		try {
-			if (TRACE_DOWNCALLS) {
-				traceDowncall("CFDataGetBytePtr", theData);
-			}
-			return (MemorySegment) mh$.invokeExact(theData);
-		} catch (Throwable ex$) {
+			log.trace("cfDataGetBytePtr() theData:{}", theData);
+			final MemorySegment result = (MemorySegment) mh$.invokeExact(theData);
+			log.trace("cfDataGetBytePtr() result:{}", result);
+			return result;
+		} catch (final Throwable ex$) {
 			throw new AssertionError("should not reach here", ex$);
 		}
 	}
@@ -437,14 +432,14 @@ public class MacSecurity {
 	 * : * extern CFStringRef CFStringCreateWithCString(CFAllocatorRef alloc, const char *cStr, CFStringEncoding encoding)
 	 * }
 	 */
-	public static MemorySegment CFStringCreateWithCString(MemorySegment alloc, MemorySegment cStr, int encoding) {
-		var mh$ = CFStringCreateWithCString.HANDLE;
+	public static MemorySegment CFStringCreateWithCString(final MemorySegment alloc, final MemorySegment cStr, final int encoding) {
+		final var mh$ = CFStringCreateWithCString.HANDLE;
 		try {
-			if (TRACE_DOWNCALLS) {
-				traceDowncall("CFStringCreateWithCString", alloc, cStr, encoding);
-			}
-			return (MemorySegment) mh$.invokeExact(alloc, cStr, encoding);
-		} catch (Throwable ex$) {
+			log.trace("cfStringCreateWithCString() alloc:{} cStr:{} encoding:{}", alloc, cStr, encoding);
+			final MemorySegment result = (MemorySegment) mh$.invokeExact(alloc, cStr, encoding);
+			log.trace("cfStringCreateWithCString() result:{}", result);
+			return result;
+		} catch (final Throwable ex$) {
 			throw new AssertionError("should not reach here", ex$);
 		}
 	}
@@ -486,7 +481,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFBooleanRef kCFBooleanTrue
 	 * }
 	 */
-	public static void kCFBooleanTrue(MemorySegment varValue) {
+	public static void kCFBooleanTrue(final MemorySegment varValue) {
 		kCFBooleanTrue$constants.SEGMENT.set(kCFBooleanTrue$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -527,7 +522,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecClass
 	 * }
 	 */
-	public static void kSecClass(MemorySegment varValue) {
+	public static void kSecClass(final MemorySegment varValue) {
 		kSecClass$constants.SEGMENT.set(kSecClass$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -568,7 +563,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecClassGenericPassword
 	 * }
 	 */
-	public static void kSecClassGenericPassword(MemorySegment varValue) {
+	public static void kSecClassGenericPassword(final MemorySegment varValue) {
 		kSecClassGenericPassword$constants.SEGMENT.set(kSecClassGenericPassword$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -609,7 +604,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecAttrAccount
 	 * }
 	 */
-	public static void kSecAttrAccount(MemorySegment varValue) {
+	public static void kSecAttrAccount(final MemorySegment varValue) {
 		kSecAttrAccount$constants.SEGMENT.set(kSecAttrAccount$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -650,7 +645,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecAttrService
 	 * }
 	 */
-	public static void kSecAttrService(MemorySegment varValue) {
+	public static void kSecAttrService(final MemorySegment varValue) {
 		kSecAttrService$constants.SEGMENT.set(kSecAttrService$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -691,7 +686,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecMatchLimit
 	 * }
 	 */
-	public static void kSecMatchLimit(MemorySegment varValue) {
+	public static void kSecMatchLimit(final MemorySegment varValue) {
 		kSecMatchLimit$constants.SEGMENT.set(kSecMatchLimit$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -732,7 +727,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecMatchLimitOne
 	 * }
 	 */
-	public static void kSecMatchLimitOne(MemorySegment varValue) {
+	public static void kSecMatchLimitOne(final MemorySegment varValue) {
 		kSecMatchLimitOne$constants.SEGMENT.set(kSecMatchLimitOne$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -773,7 +768,7 @@ public class MacSecurity {
 	 * {@snippet lang = c : * extern const CFStringRef  _Nonnull kSecReturnData
 	 * }
 	 */
-	public static void kSecReturnData(MemorySegment varValue) {
+	public static void kSecReturnData(final MemorySegment varValue) {
 		kSecReturnData$constants.SEGMENT.set(kSecReturnData$constants.LAYOUT, 0L, varValue);
 	}
 
@@ -817,14 +812,14 @@ public class MacSecurity {
 	 * {@snippet lang = c : * OSStatus SecItemCopyMatching(CFDictionaryRef  _Nonnull query, CFTypeRef  _Nullable * _Nullable result)
 	 * }
 	 */
-	public static int SecItemCopyMatching(MemorySegment query, MemorySegment result) {
-		var mh$ = SecItemCopyMatching.HANDLE;
+	public static int SecItemCopyMatching(final MemorySegment query, final MemorySegment result) {
+		final var mh$ = SecItemCopyMatching.HANDLE;
 		try {
-			if (TRACE_DOWNCALLS) {
-				traceDowncall("SecItemCopyMatching", query, result);
-			}
-			return (int) mh$.invokeExact(query, result);
-		} catch (Throwable ex$) {
+			log.trace("secItemCopyMatching() query:{} result:{}", query, result);
+			final int osStatus = (int) mh$.invokeExact(query, result);
+			log.trace("secItemCopyMatching() osStatus:{}", osStatus);
+			return osStatus;
+		} catch (final Throwable ex$) {
 			throw new AssertionError("should not reach here", ex$);
 		}
 	}
