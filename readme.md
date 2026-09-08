@@ -1,18 +1,21 @@
 # Locksmith
 
-Read passwords from the macOS Keychain during a Maven build.... because storing your password in `~/.m2/settings.xml` is a bad idea in the age of user-hostile software and creepy weirdos reading your files silently.
+Read passwords from the macOS Keychain during a Maven build. On remote machines, delegate to a forwarded socket agent. No plaintext passwords in `~/.m2/settings.xml`.
+
+Storing your password in `~/.m2/settings.xml` is a bad idea in the age of user-hostile software and creepy weirdos reading your files silently.
 
 ## Modules
 
 | Module | What it does |
 |---|---|
-| `locksmith` | Core library. Reads a generic password item from the macOS Keychain with Java FFM (Panama). |
+| `locksmith` | Core library. Reads a generic password item from the macOS Keychain with Java FFM (Panama). Falls back to a forwarded socket if the Keychain is not available. |
 | `locksmith-maven-plugin` | Maven plugin. Sets a Keychain password as a Maven project property during the `validate` phase. Use this when a plugin reads credentials from a property. |
 | `locksmith-maven-extension` | Maven core extension. Decrypts `<server>` passwords in `settings.xml` at startup. Use this for `<distributionManagement>`, repository authentication, and wagon credentials. |
 
 ## Prerequisites
 
-- macOS (Intel or Apple Silicon)
+- macOS (Intel or Apple Silicon) for local builds
+- macOS or Linux for remote builds (with socket agent)
 - Java 25+
 - Maven 3.9+
 
@@ -53,7 +56,7 @@ fi
 This install applies to all Maven builds on the machine. It's only loaded if it's actually used.
 
 ```bash
-LOCKSMITH_VERSION=1.0.1
+LOCKSMITH_VERSION=1.1.0
 
 gpg --keyserver hkps://keys.openpgp.org --recv-keys 871638A21A7F2C38066471420306A354336B4F0D
 
@@ -68,6 +71,8 @@ gpg --verify "locksmith-maven-extension-${LOCKSMITH_VERSION}.jar.asc"
 
 EXT_DIR=$(dirname "$(which mvn)")/../lib/ext
 mv -v "locksmith-maven-extension-${LOCKSMITH_VERSION}.jar" "${EXT_DIR}/"
+
+rm -rf /tmp/locksmith-stage
 ```
 
 #### Method 1: uninstallation
@@ -87,7 +92,7 @@ Create `.mvn/extensions.xml` in the project root:
     <extension>
         <groupId>com.github.exabrial.locksmith</groupId>
         <artifactId>locksmith-maven-extension</artifactId>
-        <version>1.0.1</version>
+        <version>1.1.0</version>
     </extension>
 </extensions>
 ```
@@ -122,7 +127,7 @@ Use the plugin when you need a password as a Maven project property for another 
 <plugin>
     <groupId>com.github.exabrial.locksmith</groupId>
     <artifactId>locksmith-maven-plugin</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.0</version>
     <executions>
         <execution>
             <goals>
@@ -147,6 +152,109 @@ After the `validate` phase, `${nexus.password}` is available to all subsequent p
 | `serviceName` | yes | | Keychain item name |
 | `accountName` | yes | | Keychain account name |
 | `passwordProperty` | yes | `password` | Maven project property to set |
+
+## Remote Builds
+
+Locksmith can read credentials on a remote Linux build machine. A small shell script agent runs on your Mac and serves Keychain lookups over a Unix socket. SSH forwards that socket to the remote machine. No secrets are stored remotely.
+
+### How it works
+
+1. The remote Maven build calls the locksmith extension.
+2. Locksmith finds no macOS Keychain. It opens a Unix domain socket instead.
+3. The socket is forwarded over SSH back to your Mac.
+4. A `launchd` socket-activated agent calls `security find-generic-password` and returns the password.
+
+### Socket path resolution
+
+Locksmith checks these paths in order. The first one that exists wins.
+
+1. `LOCKSMITH_SOCK` environment variable
+2. `$XDG_RUNTIME_DIR/locksmith.sock` (Linux default)
+3. `$HOME/.locksmith/locksmith.sock` (macOS default)
+
+Set `LOCKSMITH_SOCK` to override when the default paths do not fit your environment.
+
+### Setup: Mac (agent host)
+
+Create the agent script:
+
+```bash
+sudo tee /usr/local/bin/locksmith-agent.sh << 'SCRIPT'
+#!/bin/sh
+read -r request
+service="${request%%/*}"
+account="${request#*/}"
+security find-generic-password -s "$service" -a "$account" -w
+SCRIPT
+sudo chmod 755 /usr/local/bin/locksmith-agent.sh
+```
+
+Create the `launchd` plist with socket activation:
+
+```bash
+mkdir -p ~/.locksmith
+tee ~/Library/LaunchAgents/com.github.exabrial.locksmith-agent.plist << 'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.github.exabrial.locksmith-agent</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/locksmith-agent.sh</string>
+    </array>
+    <key>Sockets</key>
+    <dict>
+        <key>Listeners</key>
+        <dict>
+            <key>SockPathName</key>
+            <string>/Users/YOURUSERNAME/.locksmith/locksmith.sock</string>
+        </dict>
+    </dict>
+    <key>inetdCompatibility</key>
+    <dict>
+        <key>Wait</key>
+        <false/>
+    </dict>
+    <key>StandardErrorPath</key>
+    <string>/Users/YOURUSERNAME/.locksmith/agent.log</string>
+</dict>
+</plist>
+PLIST
+```
+
+Replace `YOURUSERNAME` with your macOS username, then load:
+
+```bash
+sed -i '' "s/YOURUSERNAME/$(whoami)/g" ~/Library/LaunchAgents/com.github.exabrial.locksmith-agent.plist
+launchctl bootout gui/$(id -u)/com.github.exabrial.locksmith-agent
+rm -f ~/.locksmith/locksmith.sock
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.exabrial.locksmith-agent.plist
+```
+
+To unload:
+
+```bash
+launchctl bootout gui/$(id -u)/com.github.exabrial.locksmith-agent
+```
+
+Add the socket forward to `~/.ssh/config`:
+
+```bash
+tee -a ~/.ssh/config << 'SSHCONF'
+
+Host build.superbiz.example.com
+    RemoteForward /run/user/10000/locksmith.sock /Users/YOURUSERNAME/.locksmith/locksmith.sock
+SSHCONF
+sed -i '' "s/YOURUSERNAME/$(whoami)/g" ~/.ssh/config
+```
+
+Change the `Host`, remote UID path, and username to match your environment.
+
+### Setup: Remote machine
+
+Install the extension jar and `settings-security.xml` the same way as a local machine. See [Install the Maven Extension](#install-the-maven-extension).
 
 ## Development
 
