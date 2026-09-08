@@ -53,7 +53,6 @@ fi
 This install applies to all Maven builds on the machine. It's only loaded if it's actually used.
 
 ```bash
-set -e
 LOCKSMITH_VERSION=1.0.1
 
 gpg --keyserver hkps://keys.openpgp.org --recv-keys 871638A21A7F2C38066471420306A354336B4F0D
