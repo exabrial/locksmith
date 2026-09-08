@@ -2,18 +2,19 @@
 
 package com.github.exabrial.locksmith.macos;
 
-import java.lang.invoke.*;
-import java.lang.foreign.*;
-import java.nio.ByteOrder;
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
+import static java.lang.foreign.MemoryLayout.PathElement.groupElement;
 
-import static java.lang.foreign.ValueLayout.*;
-import static java.lang.foreign.MemoryLayout.PathElement.*;
+import java.lang.foreign.AddressLayout;
+import java.lang.foreign.Arena;
+import java.lang.foreign.GroupLayout;
+import java.lang.foreign.MemoryLayout;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import java.lang.foreign.ValueLayout.OfLong;
+import java.util.function.Consumer;
 
 /**
- * {@snippet lang=c :
+ * {@snippet lang = c :
  * struct {
  *     CFIndex version;
  *     CFDictionaryRetainCallBack retain;
@@ -25,287 +26,264 @@ import static java.lang.foreign.MemoryLayout.PathElement.*;
  */
 public class CFDictionaryValueCallBacks {
 
-    CFDictionaryValueCallBacks() {
-        // Should not be called directly
-    }
+	CFDictionaryValueCallBacks() {
+		// Should not be called directly
+	}
 
-    private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(
-        MacSecurity.C_LONG.withName("version"),
-        MacSecurity.C_POINTER.withName("retain"),
-        MacSecurity.C_POINTER.withName("release"),
-        MacSecurity.C_POINTER.withName("copyDescription"),
-        MacSecurity.C_POINTER.withName("equal")
-    ).withName("$anon$154:9");
+	private static final GroupLayout $LAYOUT = MemoryLayout.structLayout(MacSecurity.C_LONG.withName("version"),
+			MacSecurity.C_POINTER.withName("retain"), MacSecurity.C_POINTER.withName("release"),
+			MacSecurity.C_POINTER.withName("copyDescription"), MacSecurity.C_POINTER.withName("equal")).withName("$anon$154:9");
 
-    /**
-     * The layout of this struct
-     */
-    public static final GroupLayout layout() {
-        return $LAYOUT;
-    }
+	/**
+	 * The layout of this struct
+	 */
+	public static final GroupLayout layout() {
+		return $LAYOUT;
+	}
 
-    private static final OfLong version$LAYOUT = (OfLong)$LAYOUT.select(groupElement("version"));
+	private static final OfLong version$LAYOUT = (OfLong) $LAYOUT.select(groupElement("version"));
 
-    /**
-     * Layout for field:
-     * {@snippet lang=c :
-     * CFIndex version
-     * }
-     */
-    public static final OfLong version$layout() {
-        return version$LAYOUT;
-    }
+	/**
+	 * Layout for field:
+	 * {@snippet lang = c : * CFIndex version
+	 * }
+	 */
+	public static final OfLong version$layout() {
+		return version$LAYOUT;
+	}
 
-    private static final long version$OFFSET = 0;
+	private static final long version$OFFSET = 0;
 
-    /**
-     * Offset for field:
-     * {@snippet lang=c :
-     * CFIndex version
-     * }
-     */
-    public static final long version$offset() {
-        return version$OFFSET;
-    }
+	/**
+	 * Offset for field:
+	 * {@snippet lang = c : * CFIndex version
+	 * }
+	 */
+	public static final long version$offset() {
+		return version$OFFSET;
+	}
 
-    /**
-     * Getter for field:
-     * {@snippet lang=c :
-     * CFIndex version
-     * }
-     */
-    public static long version(MemorySegment struct) {
-        return struct.get(version$LAYOUT, version$OFFSET);
-    }
+	/**
+	 * Getter for field:
+	 * {@snippet lang = c : * CFIndex version
+	 * }
+	 */
+	public static long version(MemorySegment struct) {
+		return struct.get(version$LAYOUT, version$OFFSET);
+	}
 
-    /**
-     * Setter for field:
-     * {@snippet lang=c :
-     * CFIndex version
-     * }
-     */
-    public static void version(MemorySegment struct, long fieldValue) {
-        struct.set(version$LAYOUT, version$OFFSET, fieldValue);
-    }
+	/**
+	 * Setter for field:
+	 * {@snippet lang = c : * CFIndex version
+	 * }
+	 */
+	public static void version(MemorySegment struct, long fieldValue) {
+		struct.set(version$LAYOUT, version$OFFSET, fieldValue);
+	}
 
-    private static final AddressLayout retain$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("retain"));
+	private static final AddressLayout retain$LAYOUT = (AddressLayout) $LAYOUT.select(groupElement("retain"));
 
-    /**
-     * Layout for field:
-     * {@snippet lang=c :
-     * CFDictionaryRetainCallBack retain
-     * }
-     */
-    public static final AddressLayout retain$layout() {
-        return retain$LAYOUT;
-    }
+	/**
+	 * Layout for field:
+	 * {@snippet lang = c : * CFDictionaryRetainCallBack retain
+	 * }
+	 */
+	public static final AddressLayout retain$layout() {
+		return retain$LAYOUT;
+	}
 
-    private static final long retain$OFFSET = 8;
+	private static final long retain$OFFSET = 8;
 
-    /**
-     * Offset for field:
-     * {@snippet lang=c :
-     * CFDictionaryRetainCallBack retain
-     * }
-     */
-    public static final long retain$offset() {
-        return retain$OFFSET;
-    }
+	/**
+	 * Offset for field:
+	 * {@snippet lang = c : * CFDictionaryRetainCallBack retain
+	 * }
+	 */
+	public static final long retain$offset() {
+		return retain$OFFSET;
+	}
 
-    /**
-     * Getter for field:
-     * {@snippet lang=c :
-     * CFDictionaryRetainCallBack retain
-     * }
-     */
-    public static MemorySegment retain(MemorySegment struct) {
-        return struct.get(retain$LAYOUT, retain$OFFSET);
-    }
+	/**
+	 * Getter for field:
+	 * {@snippet lang = c : * CFDictionaryRetainCallBack retain
+	 * }
+	 */
+	public static MemorySegment retain(MemorySegment struct) {
+		return struct.get(retain$LAYOUT, retain$OFFSET);
+	}
 
-    /**
-     * Setter for field:
-     * {@snippet lang=c :
-     * CFDictionaryRetainCallBack retain
-     * }
-     */
-    public static void retain(MemorySegment struct, MemorySegment fieldValue) {
-        struct.set(retain$LAYOUT, retain$OFFSET, fieldValue);
-    }
+	/**
+	 * Setter for field:
+	 * {@snippet lang = c : * CFDictionaryRetainCallBack retain
+	 * }
+	 */
+	public static void retain(MemorySegment struct, MemorySegment fieldValue) {
+		struct.set(retain$LAYOUT, retain$OFFSET, fieldValue);
+	}
 
-    private static final AddressLayout release$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("release"));
+	private static final AddressLayout release$LAYOUT = (AddressLayout) $LAYOUT.select(groupElement("release"));
 
-    /**
-     * Layout for field:
-     * {@snippet lang=c :
-     * CFDictionaryReleaseCallBack release
-     * }
-     */
-    public static final AddressLayout release$layout() {
-        return release$LAYOUT;
-    }
+	/**
+	 * Layout for field:
+	 * {@snippet lang = c : * CFDictionaryReleaseCallBack release
+	 * }
+	 */
+	public static final AddressLayout release$layout() {
+		return release$LAYOUT;
+	}
 
-    private static final long release$OFFSET = 16;
+	private static final long release$OFFSET = 16;
 
-    /**
-     * Offset for field:
-     * {@snippet lang=c :
-     * CFDictionaryReleaseCallBack release
-     * }
-     */
-    public static final long release$offset() {
-        return release$OFFSET;
-    }
+	/**
+	 * Offset for field:
+	 * {@snippet lang = c : * CFDictionaryReleaseCallBack release
+	 * }
+	 */
+	public static final long release$offset() {
+		return release$OFFSET;
+	}
 
-    /**
-     * Getter for field:
-     * {@snippet lang=c :
-     * CFDictionaryReleaseCallBack release
-     * }
-     */
-    public static MemorySegment release(MemorySegment struct) {
-        return struct.get(release$LAYOUT, release$OFFSET);
-    }
+	/**
+	 * Getter for field:
+	 * {@snippet lang = c : * CFDictionaryReleaseCallBack release
+	 * }
+	 */
+	public static MemorySegment release(MemorySegment struct) {
+		return struct.get(release$LAYOUT, release$OFFSET);
+	}
 
-    /**
-     * Setter for field:
-     * {@snippet lang=c :
-     * CFDictionaryReleaseCallBack release
-     * }
-     */
-    public static void release(MemorySegment struct, MemorySegment fieldValue) {
-        struct.set(release$LAYOUT, release$OFFSET, fieldValue);
-    }
+	/**
+	 * Setter for field:
+	 * {@snippet lang = c : * CFDictionaryReleaseCallBack release
+	 * }
+	 */
+	public static void release(MemorySegment struct, MemorySegment fieldValue) {
+		struct.set(release$LAYOUT, release$OFFSET, fieldValue);
+	}
 
-    private static final AddressLayout copyDescription$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("copyDescription"));
+	private static final AddressLayout copyDescription$LAYOUT = (AddressLayout) $LAYOUT.select(groupElement("copyDescription"));
 
-    /**
-     * Layout for field:
-     * {@snippet lang=c :
-     * CFDictionaryCopyDescriptionCallBack copyDescription
-     * }
-     */
-    public static final AddressLayout copyDescription$layout() {
-        return copyDescription$LAYOUT;
-    }
+	/**
+	 * Layout for field:
+	 * {@snippet lang = c : * CFDictionaryCopyDescriptionCallBack copyDescription
+	 * }
+	 */
+	public static final AddressLayout copyDescription$layout() {
+		return copyDescription$LAYOUT;
+	}
 
-    private static final long copyDescription$OFFSET = 24;
+	private static final long copyDescription$OFFSET = 24;
 
-    /**
-     * Offset for field:
-     * {@snippet lang=c :
-     * CFDictionaryCopyDescriptionCallBack copyDescription
-     * }
-     */
-    public static final long copyDescription$offset() {
-        return copyDescription$OFFSET;
-    }
+	/**
+	 * Offset for field:
+	 * {@snippet lang = c : * CFDictionaryCopyDescriptionCallBack copyDescription
+	 * }
+	 */
+	public static final long copyDescription$offset() {
+		return copyDescription$OFFSET;
+	}
 
-    /**
-     * Getter for field:
-     * {@snippet lang=c :
-     * CFDictionaryCopyDescriptionCallBack copyDescription
-     * }
-     */
-    public static MemorySegment copyDescription(MemorySegment struct) {
-        return struct.get(copyDescription$LAYOUT, copyDescription$OFFSET);
-    }
+	/**
+	 * Getter for field:
+	 * {@snippet lang = c : * CFDictionaryCopyDescriptionCallBack copyDescription
+	 * }
+	 */
+	public static MemorySegment copyDescription(MemorySegment struct) {
+		return struct.get(copyDescription$LAYOUT, copyDescription$OFFSET);
+	}
 
-    /**
-     * Setter for field:
-     * {@snippet lang=c :
-     * CFDictionaryCopyDescriptionCallBack copyDescription
-     * }
-     */
-    public static void copyDescription(MemorySegment struct, MemorySegment fieldValue) {
-        struct.set(copyDescription$LAYOUT, copyDescription$OFFSET, fieldValue);
-    }
+	/**
+	 * Setter for field:
+	 * {@snippet lang = c : * CFDictionaryCopyDescriptionCallBack copyDescription
+	 * }
+	 */
+	public static void copyDescription(MemorySegment struct, MemorySegment fieldValue) {
+		struct.set(copyDescription$LAYOUT, copyDescription$OFFSET, fieldValue);
+	}
 
-    private static final AddressLayout equal$LAYOUT = (AddressLayout)$LAYOUT.select(groupElement("equal"));
+	private static final AddressLayout equal$LAYOUT = (AddressLayout) $LAYOUT.select(groupElement("equal"));
 
-    /**
-     * Layout for field:
-     * {@snippet lang=c :
-     * CFDictionaryEqualCallBack equal
-     * }
-     */
-    public static final AddressLayout equal$layout() {
-        return equal$LAYOUT;
-    }
+	/**
+	 * Layout for field:
+	 * {@snippet lang = c : * CFDictionaryEqualCallBack equal
+	 * }
+	 */
+	public static final AddressLayout equal$layout() {
+		return equal$LAYOUT;
+	}
 
-    private static final long equal$OFFSET = 32;
+	private static final long equal$OFFSET = 32;
 
-    /**
-     * Offset for field:
-     * {@snippet lang=c :
-     * CFDictionaryEqualCallBack equal
-     * }
-     */
-    public static final long equal$offset() {
-        return equal$OFFSET;
-    }
+	/**
+	 * Offset for field:
+	 * {@snippet lang = c : * CFDictionaryEqualCallBack equal
+	 * }
+	 */
+	public static final long equal$offset() {
+		return equal$OFFSET;
+	}
 
-    /**
-     * Getter for field:
-     * {@snippet lang=c :
-     * CFDictionaryEqualCallBack equal
-     * }
-     */
-    public static MemorySegment equal(MemorySegment struct) {
-        return struct.get(equal$LAYOUT, equal$OFFSET);
-    }
+	/**
+	 * Getter for field:
+	 * {@snippet lang = c : * CFDictionaryEqualCallBack equal
+	 * }
+	 */
+	public static MemorySegment equal(MemorySegment struct) {
+		return struct.get(equal$LAYOUT, equal$OFFSET);
+	}
 
-    /**
-     * Setter for field:
-     * {@snippet lang=c :
-     * CFDictionaryEqualCallBack equal
-     * }
-     */
-    public static void equal(MemorySegment struct, MemorySegment fieldValue) {
-        struct.set(equal$LAYOUT, equal$OFFSET, fieldValue);
-    }
+	/**
+	 * Setter for field:
+	 * {@snippet lang = c : * CFDictionaryEqualCallBack equal
+	 * }
+	 */
+	public static void equal(MemorySegment struct, MemorySegment fieldValue) {
+		struct.set(equal$LAYOUT, equal$OFFSET, fieldValue);
+	}
 
-    /**
-     * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}.
-     * The returned segment has address {@code arrayParam.address() + index * layout().byteSize()}
-     */
-    public static MemorySegment asSlice(MemorySegment array, long index) {
-        return array.asSlice(layout().byteSize() * index);
-    }
+	/**
+	 * Obtains a slice of {@code arrayParam} which selects the array element at {@code index}. The returned segment has address
+	 * {@code arrayParam.address() + index * layout().byteSize()}
+	 */
+	public static MemorySegment asSlice(MemorySegment array, long index) {
+		return array.asSlice(layout().byteSize() * index);
+	}
 
-    /**
-     * The size (in bytes) of this struct
-     */
-    public static long sizeof() { return layout().byteSize(); }
+	/**
+	 * The size (in bytes) of this struct
+	 */
+	public static long sizeof() {
+		return layout().byteSize();
+	}
 
-    /**
-     * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
-     */
-    public static MemorySegment allocate(SegmentAllocator allocator) {
-        return allocator.allocate(layout());
-    }
+	/**
+	 * Allocate a segment of size {@code layout().byteSize()} using {@code allocator}
+	 */
+	public static MemorySegment allocate(SegmentAllocator allocator) {
+		return allocator.allocate(layout());
+	}
 
-    /**
-     * Allocate an array of size {@code elementCount} using {@code allocator}.
-     * The returned segment has size {@code elementCount * layout().byteSize()}.
-     */
-    public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
-        return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
-    }
+	/**
+	 * Allocate an array of size {@code elementCount} using {@code allocator}. The returned segment has size
+	 * {@code elementCount * layout().byteSize()}.
+	 */
+	public static MemorySegment allocateArray(long elementCount, SegmentAllocator allocator) {
+		return allocator.allocate(MemoryLayout.sequenceLayout(elementCount, layout()));
+	}
 
-    /**
-     * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
-     * The returned segment has size {@code layout().byteSize()}
-     */
-    public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
-        return reinterpret(addr, 1, arena, cleanup);
-    }
+	/**
+	 * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any). The returned segment has size
+	 * {@code layout().byteSize()}
+	 */
+	public static MemorySegment reinterpret(MemorySegment addr, Arena arena, Consumer<MemorySegment> cleanup) {
+		return reinterpret(addr, 1, arena, cleanup);
+	}
 
-    /**
-     * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any).
-     * The returned segment has size {@code elementCount * layout().byteSize()}
-     */
-    public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
-        return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
-    }
+	/**
+	 * Reinterprets {@code addr} using target {@code arena} and {@code cleanupAction} (if any). The returned segment has size
+	 * {@code elementCount * layout().byteSize()}
+	 */
+	public static MemorySegment reinterpret(MemorySegment addr, long elementCount, Arena arena, Consumer<MemorySegment> cleanup) {
+		return addr.reinterpret(layout().byteSize() * elementCount, arena, cleanup);
+	}
 }
-
