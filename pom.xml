@@ -53,6 +53,7 @@
 	<modules>
 		<!-- please maintain alphabetical order -->
 		<module>locksmith</module>
+		<module>locksmith-maven-extension</module>
 		<module>locksmith-maven-plugin</module>
 	</modules>
 </project>
