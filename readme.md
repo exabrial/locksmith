@@ -111,6 +111,10 @@ Reference the Keychain item in `settings.xml`:
 
 The format is `{[type=locksmith]serviceName/accountName}`. Maven's `DefaultSecDispatcher` finds the `locksmith` decryptor and reads the password from the Keychain.
 
+On the first access, macOS prompts for your login keychain password:
+
+![Keychain prompt](screenshots/prompt-screenshot.png)
+
 ## Usage: Maven Plugin
 
 Use the plugin when you need a password as a Maven project property for another plugin's configuration exported as a maven property.
