@@ -241,18 +241,22 @@ To unload:
 launchctl bootout gui/$(id -u)/com.github.exabrial.locksmith-agent
 ```
 
-Add the socket forward to `~/.ssh/config`:
+Add the socket forward to `~/.ssh/config`. Find your remote UID first:
 
 ```bash
-tee -a ~/.ssh/config << 'SSHCONF'
-
-Host build.superbiz.example.com
-    RemoteForward /run/user/10000/locksmith.sock /Users/YOURUSERNAME/.locksmith/locksmith.sock
-SSHCONF
-sed -i '' "s/YOURUSERNAME/$(whoami)/g" ~/.ssh/config
+ssh build.superbiz.example.com id -u
 ```
 
-Change the `Host`, remote UID path, and username to match your environment.
+Use the output (e.g. `10000`) in the `RemoteForward` path:
+
+```bash
+REMOTE_UID=$(ssh build.superbiz.example.com id -u)
+tee -a ~/.ssh/config << SSHCONF
+
+Host build.superbiz.example.com
+    RemoteForward /run/user/${REMOTE_UID}/locksmith.sock /Users/$(whoami)/.locksmith/locksmith.sock
+SSHCONF
+```
 
 ### Setup: Remote machine
 
