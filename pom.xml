@@ -10,7 +10,7 @@
 
 	<groupId>com.github.exabrial.locksmith</groupId>
 	<artifactId>locksmith-parent</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 	<description>Locksmith: Retrieve secrets from OS credential stores and set them as Maven project properties</description>
@@ -21,7 +21,7 @@
 		<connection>scm:git:ssh://git@github.com/exabrial/locksmith.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/exabrial/locksmith.git</developerConnection>
 		<url>https://github.com/exabrial/locksmith/tree/master</url>
-		<tag>locksmith-parent-1.0.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<properties>
@@ -33,7 +33,7 @@
 			<dependency>
 				<groupId>com.github.exabrial.locksmith</groupId>
 				<artifactId>locksmith</artifactId>
-				<version>1.0.0</version>
+				<version>1.0.1-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -44,7 +44,7 @@
 				<plugin>
 					<groupId>com.github.exabrial.locksmith</groupId>
 					<artifactId>locksmith-maven-plugin</artifactId>
-					<version>1.0.0</version>
+					<version>1.0.1-SNAPSHOT</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
