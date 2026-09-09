@@ -89,7 +89,7 @@ rm -rfv /tmp/locksmith-stage
 ```
 
 
-### Method 2: Per-project `.mvn/extensions.xml`
+#### Method 2: Per-project `.mvn/extensions.xml`
 
 This method requires all developers of the project to set up their machines exactly alike, which isn't ideal. Prefer Method 1 when possible.
 
@@ -106,6 +106,8 @@ Create `.mvn/extensions.xml` in the project root:
 ```
 
 ## Usage
+
+### Maven Extension
 
 Reference the Keychain item in `settings.xml`:
 
@@ -125,9 +127,9 @@ On the first access, macOS prompts for your login keychain password:
 
 ![Keychain prompt](screenshots/prompt-screenshot.png)
 
-Thats it! You're done!
+If all you were trying to do is secure your secrets, thats it! You're done!
 
-## Usage: Maven Plugin
+### Maven Plugin
 
 This part is not required for normal use. However, you may have secrets you want to store in the macOS keychain that can't be resolved from `settings.xml`. In that case, if the secret can be read from a maven property, you can defer to Locksmith to read them from secure storage.
 
@@ -155,7 +157,7 @@ Essentially, use the Maven plugin when you need a password as a Maven project pr
 
 After the `validate` phase, `${nexus.password}` is available to all subsequent plugins.
 
-### Plugin Parameters
+#### Plugin Parameters
 
 | Parameter | Required | Default | Description |
 |---|---|---|---|
