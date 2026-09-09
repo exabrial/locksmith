@@ -1,45 +1,47 @@
 # Locksmith
 
-Read passwords from the macOS Keychain during a Maven build. On remote machines, delegate to a forwarded socket agent. No plaintext passwords in `~/.m2/settings.xml`.
+Give Maven the ability to use the macOS Keychain, or defer to a Unix Socket, giving you the ability to defer to a custom password manager.
 
-Storing your passwords or GPLAT tokens in `~/.m2/settings.xml` is a bad idea in the age of user-hostile software and unfettered outbound internet access.
+⭐ Before you leave, ⭐ Leave a star! ⭐ Thanks! :) ⭐
 
-## Modules
+## What it does
 
-| Module | What it does |
-|---|---|
-| `locksmith` | Core library. Reads a generic password item from the macOS Keychain with Java FFM (Panama). Falls back to a forwarded socket if the Keychain is not available. |
-| `locksmith-maven-plugin` | Maven plugin. Sets a Keychain password as a Maven project property during the `validate` phase. Use this when a plugin reads credentials from a property. |
-| `locksmith-maven-extension` | Maven core extension. Decrypts `<server>` passwords in `settings.xml` at startup. Use this for `<distributionManagement>`, repository authentication, and wagon credentials. |
+Hide your plaintext secrets/passwords in `~/.m2/settings.xml`. For those in regulated industries, this makes `~/.m2/settings.xml` FIPS-140 compliant.
 
-## Prerequisites
+In general, storing your passwords or any`gplat` tokens in `~/.m2/settings.xml` is a bad idea in the age of user-hostile software and unfettered outbound internet access... After all, we want to avoid having secrets getting sucked into a "misconfigured" LLM or a piece of software with an RCE.
+
+So, for those of us with short attention spans, Locksmith allows your settings.xml to look like this:
+
+![Tokenized settings.xml](screenshots/tokenized-settings-xml.png)
+
+Instead of this:
+
+![Plaintext settings.xml](screenshots/plaintext-settings-xml.png)
+
+## Operating Theory
+
+The core Locksmith library exposes an API to read generic password items from the macOS Keychain via the Panama FFM. This project contains both a Maven Core Extension and Maven Plugin. The Core Extension and Maven Plugin both use the core Locksmith library. The Maven Core Extension is the primary product of this project.
+
+At startup, Maven loads all jars in its `lib/ext` directory. Sisu discovers the `LocksmithPasswordDecryptor` component from the extension jar. Maven's `DefaultSecDispatcher` looks for `settings-security.xml`; this file must exist, otherwise no custom `PasswordDecryptor`s are invokved (note the setup instructions below give the option of creating essentially a No-Op file). Maven then beings reading `settings.xml`. When it encounters`[type=locksmith]` attribute from the password string, Maven delegates to `LocksmithPasswordDecryptor`. The decryptor then invokes the core Locksmith library to read the password from the macOS Keychain.
+
+If the macOS Keychain is unavailable, as it is happens on Linux, it defers to a Unix Socket. This socket could be anything, like a custom password manager, but a common use case is to support remote builds over ssh, where the socket is forwarded and a local script answers with items from the macOS Keychain.
+
+## Installation
+
+### Prerequisites
 
 - macOS (Intel or Apple Silicon) for local builds
 - macOS or Linux for remote builds (with socket agent)
-- Java 25+
+- Java 25+ (Panama FFM needed)
 - Maven 3.9+
 
-## Store a password in the Keychain
+If your Maven Build requires a lower JDK vesion that Java 25, set up the toolchains plugin for your project, so the Maven JDK and your project JDK are different.
 
-```bash
-security add-generic-password -U -s "nexus.superbiz.example.com" -a "your-nexus-username" -w
-```
+### Procedures
 
-The `-w` flag with no value prompts for the password. The `-U` flag updates the item if it already exists.
+#### Create `settings-security.xml`
 
-To verify:
-
-```bash
-security find-generic-password -s "nexus.superbiz.example.com" -a "your-nexus-username" -w
-```
-
-## Install the Maven Extension
-
-Maven core extensions load at startup, before `settings.xml` server passwords are resolved. You cannot add a core extension to a POM. Use one of the two methods below.
-
-### Create `settings-security.xml`
-
-Maven's `DefaultSecDispatcher` reads `settings-security.xml` before it dispatches to locksmith. The file must exist or the decryptor never runs. Create it if it does not exist:
+Maven's `DefaultSecDispatcher` basically existence-checks `settings-security.xml` before it dispatches to any custom `PasswordDecryptor`s. The file must exist. Here is a script to create a No-Op file if it doesn't:
 
 ```bash
 if [ ! -f "$HOME/.m2/settings-security.xml" ]; then
@@ -51,11 +53,20 @@ EOF
 fi
 ```
 
-### Method 1: Global install (recommended)
+#### Store your secrets in the MacOS Keychain
 
-A global installation puts the locksmith extension jar in Maven's `lib/ext` folder. This install applies to all Maven builds on the machine. The extension is only loaded if it's actually used.
+```bash
+security add-generic-password -U -s "nexus.superbiz.example.com" -a "your-nexus-username" -w
+```
 
-You can copy the jar by hand, or use this script below to download and verify the PGP signature of the extension jar:
+The `-w` flag with no value prompts for the password. The `-U` flag updates the item if it already exists.
+
+
+#### Method 1: Global install (recommended)
+
+A global installation puts the locksmith extension jar in Maven's `lib/ext` folder. This install applies to all Maven builds on the machine. The extension is only used if it's actually configured, making it transparent to any of your existing projects.
+
+You may copy the jar by hand. The better way is to use this script below to download and verify the GPG signature of the extension jar:
 
 ```bash
 LOCKSMITH_VERSION=1.1.0
@@ -67,25 +78,20 @@ mkdir -p /tmp/locksmith-stage
 cd /tmp/locksmith-stage
 
 URL=https://repo1.maven.org/maven2/com/github/exabrial/locksmith/locksmith-maven-extension/${LOCKSMITH_VERSION}/locksmith-maven-extension-${LOCKSMITH_VERSION}
-wget -q "${URL}.jar" "${URL}.jar.asc"
+curl -sO "${URL}.jar" -O "${URL}.jar.asc"
 
 gpg --verify "locksmith-maven-extension-${LOCKSMITH_VERSION}.jar.asc"
 
-EXT_DIR=$(dirname "$(which mvn)")/../lib/ext
+EXT_DIR="$(mvn --version | sed -n 's/Maven home: //p')/lib/ext"
 mv -v "locksmith-maven-extension-${LOCKSMITH_VERSION}.jar" "${EXT_DIR}/"
 
-rm -rf /tmp/locksmith-stage
+rm -rfv /tmp/locksmith-stage
 ```
 
-#### Method 1: uninstallation
-
-```
-rm -rfv "$(dirname "$(which mvn)")/../lib/ext/"/locksmith*
-```
 
 ### Method 2: Per-project `.mvn/extensions.xml`
 
-Add this file to every project that needs it.
+This method requires all developers of the project to set up their machines exactly alike, which isn't ideal. Prefer Method 1 when possible.
 
 Create `.mvn/extensions.xml` in the project root:
 
@@ -99,9 +105,7 @@ Create `.mvn/extensions.xml` in the project root:
 </extensions>
 ```
 
-## Usage: Maven Extension
-
-Use the extension when Maven must authenticate to a repository or server.
+## Usage
 
 Reference the Keychain item in `settings.xml`:
 
@@ -155,16 +159,35 @@ After the `validate` phase, `${nexus.password}` is available to all subsequent p
 | `accountName` | yes | | Keychain account name |
 | `passwordProperty` | yes | `password` | Maven project property to set |
 
-## Remote Builds
 
-Locksmith can read credentials on a remote Linux build machine. A small shell script agent runs on your Mac and serves Keychain lookups over a Unix socket. SSH forwards that socket to the remote machine. No secrets are stored remotely.
+### Handy Commands
 
-### How it works
 
-1. The remote Maven build calls the locksmith extension.
-2. Locksmith finds no macOS Keychain. It opens a Unix domain socket instead.
-3. The socket is forwarded over SSH back to your Mac.
-4. A `launchd` socket-activated agent calls `security find-generic-password` and returns the password.
+#### Method 1: Global uninstallation
+
+```
+rm -rfv "$(mvn --version | sed -n 's/Maven home: //p')/lib/ext/"/locksmith*
+```
+
+
+#### Verify an item in the macOS Keychain
+
+```bash
+security find-generic-password -s "nexus.superbiz.example.com" -a "your-nexus-username" -w
+```
+
+#### Reset the ACL for your Keychain Entry
+
+This gives you the macOS ACL prompt back:
+
+```bash
+security set-generic-password-partition-list -S "" -s "nexus.superbiz.example.com" -a "your-nexus-username" -k "$(read -sp 'Keychain password: ' p; echo $p)"
+```
+
+## Socket shenanigans
+
+Locksmith can read credentials from a Unix Socket as well. This could be anything technically, like a custom password manager, but a common use case is to support remote builds running over an ssh connection.
+
 
 ### Socket path resolution
 
@@ -176,9 +199,13 @@ Locksmith checks these paths in order. The first one that exists wins.
 
 Set `LOCKSMITH_SOCK` to override when the default paths do not fit your environment.
 
-### Setup: Mac (agent host)
+### Remote Builds
 
-Create the agent script:
+A small shell script agent runs on your Mac and serves Keychain lookups over a Unix socket. SSH forwards that socket to the remote machine. No secrets are stored remotely.  A `launchd` socket-activated agent calls `security find-generic-password` and returns the password.
+
+#### Setup: Mac agent host
+
+##### Local Agent Script
 
 ```bash
 sudo tee /usr/local/bin/locksmith-agent.sh << 'SCRIPT'
@@ -191,7 +218,7 @@ SCRIPT
 sudo chmod 755 /usr/local/bin/locksmith-agent.sh
 ```
 
-Create the `launchd` plist with socket activation:
+##### launchd plist with socket activation
 
 ```bash
 mkdir -p ~/.locksmith
@@ -226,8 +253,6 @@ tee ~/Library/LaunchAgents/com.github.exabrial.locksmith-agent.plist << 'PLIST'
 PLIST
 ```
 
-Replace `YOURUSERNAME` with your macOS username, then load:
-
 ```bash
 sed -i '' "s/YOURUSERNAME/$(whoami)/g" ~/Library/LaunchAgents/com.github.exabrial.locksmith-agent.plist
 launchctl bootout gui/$(id -u)/com.github.exabrial.locksmith-agent
@@ -235,19 +260,9 @@ rm -f ~/.locksmith/locksmith.sock
 launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.exabrial.locksmith-agent.plist
 ```
 
-To unload:
+##### ssh configuration
 
-```bash
-launchctl bootout gui/$(id -u)/com.github.exabrial.locksmith-agent
-```
-
-Add the socket forward to `~/.ssh/config`. Find your remote UID first:
-
-```bash
-ssh build.superbiz.example.com id -u
-```
-
-Use the output (e.g. `10000`) in the `RemoteForward` path:
+Add the socket forward to `~/.ssh/config`
 
 ```bash
 REMOTE_UID=$(ssh build.superbiz.example.com id -u)
@@ -258,23 +273,31 @@ Host build.superbiz.example.com
 SSHCONF
 ```
 
-### Setup: Remote machine
+##### Remote machine
 
-Install the extension jar and `settings-security.xml` the same way as a local machine. See [Install the Maven Extension](#install-the-maven-extension).
+Install the extension jar into `lib/ext` and create a `settings-security.xml` if it doesn't exist; the same way as a local machine.
 
 ## Development
 
-### Notes to future self
+### Modules
+
+| Module | What it does |
+|---|---|
+| `locksmith` | Core library. Reads a generic password item from the macOS Keychain with Java FFM (Panama). Falls back to a forwarded socket if the Keychain is not available. |
+| `locksmith-maven-plugin` | Maven plugin. Sets a Keychain password as a Maven project property during the `validate` phase. Use this when a plugin reads credentials from a property. |
+| `locksmith-maven-extension` | Maven core extension. Decrypts `<server>` passwords in `settings.xml` at startup. Use this for `<distributionManagement>`, repository authentication, and wagon credentials. |
+
+#### Notes to future self
 
 ...so I don't forget how to do this when Apple breaks backwards compatibility next year.
 
-#### Installing jextract
+##### Installing jextract
 
 ```bash
 sdk install jextract
 ```
 
-#### Regenerate FFM bindings
+##### Regenerate FFM bindings
 
 ```bash
 cd ~/opensource/locksmith
@@ -319,7 +342,7 @@ jextract --target-package com.github.exabrial.locksmith.macos \
     /tmp/locksmith-headers/locksmith.h
 ```
 
-#### Install during development:
+##### Install during development:
 
 ```
 cd ~/opensource/locksmith
