@@ -166,7 +166,7 @@ After the `validate` phase, `${nexus.password}` is available to all subsequent p
 | `passwordProperty` | yes | `password` | Maven project property to set |
 
 
-### Handy Commands
+## Handy Commands
 
 
 #### Method 1: Global uninstallation
