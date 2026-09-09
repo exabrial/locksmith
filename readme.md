@@ -125,9 +125,13 @@ On the first access, macOS prompts for your login keychain password:
 
 ![Keychain prompt](screenshots/prompt-screenshot.png)
 
+Thats it! You're done!
+
 ## Usage: Maven Plugin
 
-Use the plugin when you need a password as a Maven project property for another plugin's configuration exported as a maven property.
+This part is not required for normal use. However, you may have secrets you want to store in the macOS keychain that can't be resolved from `settings.xml`. In that case, if the secret can be read from a maven property, you can defer to Locksmith to read them from secure storage.
+
+Essentially, use the Maven plugin when you need a password as a Maven project property for another plugin's configuration exported as a maven property.
 
 ```xml
 <plugin>
