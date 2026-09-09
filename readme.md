@@ -2,7 +2,7 @@
 
 Read passwords from the macOS Keychain during a Maven build. On remote machines, delegate to a forwarded socket agent. No plaintext passwords in `~/.m2/settings.xml`.
 
-Storing your password in `~/.m2/settings.xml` is a bad idea in the age of user-hostile software and creepy weirdos reading your files silently.
+Storing your passwords or GPLAT tokens in `~/.m2/settings.xml` is a bad idea in the age of user-hostile software and unfettered outbound internet access.
 
 ## Modules
 
