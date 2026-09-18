@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.sonatype.plexus.components.sec.dispatcher.PasswordDecryptor;
 import org.sonatype.plexus.components.sec.dispatcher.SecDispatcherException;
 
-import com.github.exabrial.locksmith.CredentialReader;
+import com.github.exabrial.locksmith.CompositeCredentialReader;
 
 @Singleton
 @Named("locksmith")
@@ -31,7 +31,7 @@ public class LocksmithPasswordDecryptor implements PasswordDecryptor {
 			final String serviceName = str.substring(0, separatorIndex);
 			final String accountName = str.substring(separatorIndex + 1);
 			try {
-				final String password = CredentialReader.readPassword(serviceName, accountName);
+				final String password = CompositeCredentialReader.getInstance().readPassword(serviceName, accountName);
 				if (password == null) {
 					throw new SecDispatcherException("keychain item not found for serviceName:" + serviceName + " accountName:" + accountName);
 				} else {
