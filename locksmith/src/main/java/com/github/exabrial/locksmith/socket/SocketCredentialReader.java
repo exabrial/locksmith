@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class SocketCredentialReader {
+public class SocketCredentialReader {
 	private static final Logger log = LoggerFactory.getLogger(SocketCredentialReader.class);
 
 	private SocketCredentialReader() {

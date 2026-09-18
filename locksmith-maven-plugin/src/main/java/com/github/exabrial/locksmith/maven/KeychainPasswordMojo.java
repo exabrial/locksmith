@@ -7,7 +7,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import com.github.exabrial.locksmith.CredentialReader;
+import com.github.exabrial.locksmith.CompositeCredentialReader;
 
 @Mojo(name = "read-password", defaultPhase = LifecyclePhase.VALIDATE)
 public class KeychainPasswordMojo extends AbstractMojo {
@@ -28,7 +28,7 @@ public class KeychainPasswordMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		getLog().info("reading keychain item serviceName:" + serviceName + " accountName:" + accountName);
 		try {
-			final String password = CredentialReader.readPassword(serviceName, accountName);
+			final String password = CompositeCredentialReader.getInstance().readPassword(serviceName, accountName);
 			if (password == null) {
 				throw new MojoExecutionException("keychain item not found for serviceName:" + serviceName + " accountName:" + accountName);
 			} else {
