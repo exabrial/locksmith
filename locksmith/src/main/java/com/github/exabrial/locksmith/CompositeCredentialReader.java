@@ -14,7 +14,7 @@ public class CompositeCredentialReader implements CredentialReader {
 
 	private final List<CredentialReader> readers = getReaders();
 
-	protected CompositeCredentialReader() {
+	private CompositeCredentialReader() {
 	}
 
 	protected List<CredentialReader> getReaders() {
