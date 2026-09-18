@@ -20,6 +20,7 @@
 		<dependency>
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-sec-dispatcher</artifactId>
+			<version>4.2.0</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

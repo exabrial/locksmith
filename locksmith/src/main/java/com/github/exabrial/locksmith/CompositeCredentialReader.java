@@ -12,9 +12,13 @@ public class CompositeCredentialReader implements CredentialReader {
 	private static final Logger log = LoggerFactory.getLogger(CompositeCredentialReader.class);
 	private static final CompositeCredentialReader INSTANCE = new CompositeCredentialReader();
 
-	private final List<CredentialReader> readers = List.of(new MacOsKeychainCredentialReader(), new SocketAgentCredentialReader());
+	private final List<CredentialReader> readers = getReaders();
 
-	private CompositeCredentialReader() {
+	protected CompositeCredentialReader() {
+	}
+
+	protected List<CredentialReader> getReaders() {
+		return List.of(new MacOsKeychainCredentialReader(), new SocketAgentCredentialReader());
 	}
 
 	public static CompositeCredentialReader getInstance() {
