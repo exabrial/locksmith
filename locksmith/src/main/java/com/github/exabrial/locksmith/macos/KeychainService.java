@@ -24,7 +24,7 @@ import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.nio.charset.StandardCharsets;
 
-public final class KeychainService {
+public class KeychainService {
 	private static final int K_CF_STRING_ENCODING_UTF8 = 0x08000100;
 	private static final int ERR_SEC_SUCCESS = 0;
 	private static final int ERR_SEC_ITEM_NOT_FOUND = -25300;
