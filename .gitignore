@@ -16,7 +16,11 @@
 .metadata
 .classpath
 .checkstyle
-.settings/
+.settings
+.factorypath
+
+# visual studio
+.vscode
 
 # Maven files #
 data/

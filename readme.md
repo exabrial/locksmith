@@ -129,6 +129,17 @@ On the first access, macOS prompts for your login keychain password:
 
 If all you were trying to do is secure your secrets, thats it! You're done!
 
+
+### Eclipse integration
+
+If you use sdkman to manage maven, you may execute the following to copy the jar into Eclipse. Restart the IDE afterwards.
+
+```bash
+EXT_DIR="$(mvn --version | sed -n 's/Maven home: //p')/lib/ext"
+cp -v "${EXT_DIR}"/locksmith-maven-extension-*.jar \
+   /Applications/Eclipse.app/Contents/Eclipse/plugins/org.eclipse.m2e.maven.runtime_*/jars/
+```
+
 ### Maven Plugin
 
 This part is not required for normal use. However, you may have secrets you want to store in the macOS keychain that can't be resolved from `settings.xml`. In that case, if the secret can be read from a maven property, you can defer to Locksmith to read them from secure storage.
