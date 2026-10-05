@@ -132,7 +132,7 @@ If all you were trying to do is secure your secrets, thats it! You're done!
 
 ### Eclipse integration
 
-If you use sdkman to manage maven, you may execute the following to copy the jar into Eclipse. Restart the IDE afterwards.
+Eclipse uses it's own maven by default. You may switch to an external version, but I think the better route is to put the extension in the embedded version. You may execute the following to copy the jar into Eclipse. Restart the IDE afterwards.
 
 ```bash
 EXT_DIR="$(mvn --version | sed -n 's/Maven home: //p')/lib/ext"
